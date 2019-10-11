@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>飞机大战</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no">
+</head>
+<script>
+  document.documentElement.style.fontSize = document.documentElement.clientWidth/6.4 + 'px';
+</script>
+<style>
+  html{
+    font-size: 50px;
+  }
+  html,body{
+    margin: 0;
+    padding: 0;
+  }
+  #main{
+    width: 6.4rem;
+    height: 11.36rem;
+    background: url("./img/bj/bg1.jpg") no-repeat;
+    background-position: center;
+    background-size: contain;
+    position: relative;
+    margin: 0 auto;
+    overflow: hidden;
+  }
+  #tips{
+    font-size: .5rem;
+    margin-left: .3rem;
+    margin-top: .3rem;
+    color: white;
+  }
+  #pauseBtn{
+    position: absolute;
+    right: .2rem;
+    top: .3rem;
+    width: .7rem;
+    height: .7rem;
+    border: greenyellow 3px solid;
+    border-radius: 50%;
+    color: greenyellow;
+    font-weight: bold;
+    font-size: .35rem;
+    text-align: center;
+    vertical-align: baseline;
+    line-height: .7rem;
+  }
+</style>
+<body>
+<div id="main">
+  <div id="tips">
+    <div>杀敌：<span id="kill">0</span></div>
+    <div>分数：<span id="score">0</span></div>
+    <div>血量：<span id="health">0</span></div>
+  </div>
+  <div id="pauseBtn">||</div>
+</div>
+</body>
+<script>
+  let main = document.querySelector('#main');
+  let enemyPlaneArray = [];
+  let myAirPlane = new airPlane('./img/own/own.png',488,127,10);
+  let enemyPlane = setInterval(function (){new enemy('./img/enemy/xiaofeiji.png',-44,Math.floor(Math.random()*286),10)},1000);
+
+  let keyCode = setInterval(startKey,100);
+  let planeMove = setInterval(movePlane,50);
+  let enemyMoveF = setInterval(enemyMove,100);
+  /*
+  * img
+  * top
+  * left
+  * speed
+  * moveT
+  * moveL
+  * moveR
+  * moveB
+  * isMoveTop
+  * isMoveBottom
+  * isMoveLeft
+  * isMoveRight
+  * */
+  function airPlane(img,top,left,speed) {
+    this.img = img;
+    this.left = left;
+    this.top = top;
+    this.speed = speed;
+    this.isMoveTop = false;
+    this.isMoveBottom = false;
+    this.isMoveLeft = false;
+    this.isMoveRight = false;
+    this.init = function () {
+      this.airPlane = document.createElement('img');
+      this.airPlane.src = this.img;
+      this.airPlane.style.position = 'absolute';
+      this.airPlane.style.top = this.top+'px';
+      this.airPlane.style.left = this.left+'px';
+      main.appendChild(this.airPlane);
+    };
+    this.init();
+    this.moveT = function () {
+      if(this.isMoveTop){
+        if(parseInt(this.airPlane.style.top) > 0){
+          this.airPlane.style.top = parseInt(this.airPlane.style.top)-parseInt(this.speed)+'px';
+        }
+      }
+    };
+    this.moveB = function () {
+      if(this.isMoveBottom){
+        if(parseInt(this.airPlane.style.top) < 488){
+          this.airPlane.style.top = parseInt(this.airPlane.style.top)+parseInt(this.speed)+'px';
+        }
+      }
+    };
+    this.moveL = function () {
+      if(this.isMoveLeft){
+
+        if(parseInt(this.airPlane.style.left)<-66){
+          this.airPlane.style.left = 320+'px';
+        }else{
+          this.airPlane.style.left = parseInt(this.airPlane.style.left)-parseInt(this.speed)+'px';
+        }
+      }
+    };
+    this.moveR = function () {
+      if(this.isMoveRight){
+        if(parseInt(this.airPlane.style.left) > 320){
+          this.airPlane.style.left = (-66)+'px';
+        }else{
+          this.airPlane.style.left = parseInt(this.airPlane.style.left)+parseInt(this.speed)+'px';
+        }
+      }
+    };
+  }
+  function startKey() {
+    document.documentElement.onkeydown = function (e) {
+      //up : 38  down: 40 left: 37 right: 39
+      if (e.keyCode == 38) {
+        myAirPlane.isMoveTop = true;
+      }
+      if (e.keyCode == 37) {
+        myAirPlane.isMoveLeft = true;
+      }
+      if (e.keyCode == 39) {
+        myAirPlane.isMoveRight = true;
+      }
+      if (e.keyCode == 40) {
+        myAirPlane.isMoveBottom = true;
+      }
+    };
+    document.documentElement.onkeyup = function (e) {
+      //up : 38  down: 40 left: 37 right: 39
+      if (e.keyCode == 38) {
+        myAirPlane.isMoveTop = false;
+      }
+      if (e.keyCode == 37) {
+        myAirPlane.isMoveLeft = false;
+      }
+      if (e.keyCode == 39) {
+        myAirPlane.isMoveRight = false;
+      }
+      if (e.keyCode == 40) {
+        myAirPlane.isMoveBottom = false;
+      }
+    }
+  }
+
+  function movePlane() {
+    if(myAirPlane.isMoveTop){
+      myAirPlane.moveT();
+    }
+    if(myAirPlane.isMoveBottom){
+      myAirPlane.moveB();
+    }
+    if(myAirPlane.isMoveLeft){
+      myAirPlane.moveL();
+    }
+    if(myAirPlane.isMoveRight){
+      myAirPlane.moveR();
+    }
+  }
+
+
+
+  /**
+   * img
+   * top
+   * left
+   * speed
+   * moveB
+   *
+   * */
+  function enemy(img,top,left,speed) {
+    this.img = img;
+    this.top = top;
+    this.left = left;
+    this.speed = speed;
+    this.init = function () {
+      this.enemy = document.createElement('img');
+      this.enemy.src = this.img;
+      this.enemy.style.position = 'absolute';
+      this.enemy.style.top = this.top+'px';
+      this.enemy.style.left = this.left+'px';
+      main.appendChild(this.enemy);
+    }
+    this.init();
+    this.move = function () {
+      this.enemy.style.top = parseInt(this.enemy.style.top)+parseInt(this.speed) + 'px';
+    }
+    enemyPlaneArray.push(this);
+  }
+  function enemyMove() {
+    for (i=0;i<enemyPlaneArray.length;i++){
+          enemyPlaneArray[i].move();
+    }
+  }
+
+</script>
+</html>
