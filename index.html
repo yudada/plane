@@ -60,6 +60,8 @@
 </body>
 <script>
   let main = document.querySelector('#main');
+  let killNum = document.querySelector('#kill');
+  let score = document.querySelector('#score');
   let enemyPlaneArray = [];
   let bulletArray = [];
   let myAirPlane = new airPlane('./img/own/own.png',488,127,10);
@@ -67,9 +69,10 @@
 
   let keyCode = setInterval(startKey,100);
   let planeMove = setInterval(movePlane,50);
-  let planeShootI = setInterval(planeShoot,150);
-  let enemyMoveF = setInterval(enemyMove,100);
-  let bulletMoveF = setInterval(bulletMove,130);
+  let planeShootI = setInterval(planeShoot,100);
+  let enemyMoveF = setInterval(enemyMove,50);
+  let bulletMoveF = setInterval(bulletMove,50);
+  let hitBoom = setInterval(hit,100);
   /*
   * img
   * top
@@ -223,6 +226,8 @@
     this.top = top;
     this.left = left;
     this.speed = speed;
+    this.isAlive = true;
+    this.disapper = 5;
     this.init = function () {
       this.enemy = document.createElement('img');
       this.enemy.src = this.img;
@@ -233,7 +238,9 @@
     }
     this.init();
     this.move = function () {
-      this.enemy.style.top = parseInt(this.enemy.style.top)+parseInt(this.speed) + 'px';
+      if(this.isAlive){
+        this.enemy.style.top = parseInt(this.enemy.style.top)+parseInt(this.speed) + 'px';
+      }
     }
     enemyPlaneArray.push(this);
   }
@@ -243,7 +250,15 @@
         main.removeChild(enemyPlaneArray[i].enemy);
         enemyPlaneArray.splice(i,1);
       }else{
-        enemyPlaneArray[i].move();
+        if(enemyPlaneArray[i].disapper>0 && !enemyPlaneArray[i].isAlive){
+          enemyPlaneArray[i].disapper--;
+        }else{
+          enemyPlaneArray[i].move();
+          if(enemyPlaneArray[i].disapper<=0){
+           main.removeChild(enemyPlaneArray[i].enemy); //移除节点
+            enemyPlaneArray.splice(i,1); //删除数组里面元素
+          }
+        }
       }
     }
   }
@@ -282,6 +297,29 @@
       }else{
         bulletArray[i].move();
       }
+    }
+  }
+
+  function hit() {
+      for (let i=0;i<bulletArray.length;i++){
+        for (let j = 0;j<enemyPlaneArray.length;j++){
+          if(enemyPlaneArray[j].isAlive){
+            let leftNotHit = parseInt(bulletArray[i].bullet.style.left) + 25 < parseInt(enemyPlaneArray[j].enemy.style.left);
+            let rightNotHit = parseInt(bulletArray[i].bullet.style.left) > parseInt(enemyPlaneArray[j].enemy.style.left) + 34;
+            let topNotHit = parseInt(bulletArray[i].bullet.style.top) + 50 < parseInt(enemyPlaneArray[j].enemy.style.top);
+            let bottomNotHit = parseInt(bulletArray[i].bullet.style.top) > parseInt(enemyPlaneArray[j].enemy.style.top) + 34;
+            if (!leftNotHit && !rightNotHit && !topNotHit && !bottomNotHit) {
+              enemyPlaneArray[j].isAlive = false;
+              enemyPlaneArray[j].enemy.src = './img/crash/xzfjbz.png';
+              main.removeChild(bulletArray[i].bullet);
+              bulletArray.splice(i, 1);
+
+              killNum.textContent = parseInt(killNum.textContent)+1;
+              score.textContent = parseInt(score.textContent)+10;
+              break;
+            }
+          }
+        }
     }
   }
 
