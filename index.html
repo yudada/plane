@@ -61,12 +61,15 @@
 <script>
   let main = document.querySelector('#main');
   let enemyPlaneArray = [];
+  let bulletArray = [];
   let myAirPlane = new airPlane('./img/own/own.png',488,127,10);
   let enemyPlane = setInterval(function (){new enemy('./img/enemy/xiaofeiji.png',-44,Math.floor(Math.random()*286),10)},1000);
 
   let keyCode = setInterval(startKey,100);
   let planeMove = setInterval(movePlane,50);
+  let planeShootI = setInterval(planeShoot,150);
   let enemyMoveF = setInterval(enemyMove,100);
+  let bulletMoveF = setInterval(bulletMove,130);
   /*
   * img
   * top
@@ -90,6 +93,8 @@
     this.isMoveBottom = false;
     this.isMoveLeft = false;
     this.isMoveRight = false;
+    this.isShoot = false;
+    this.shootOnce = 0;
     this.init = function () {
       this.airPlane = document.createElement('img');
       this.airPlane.src = this.img;
@@ -132,6 +137,17 @@
         }
       }
     };
+    this.shoot = function () {
+      if(this.isShoot){
+        if(this.shootOnce == 0){
+          let bulletLeft = parseInt(this.airPlane.style.left) + 20.5;
+          let bulletTop = parseInt(this.airPlane.style.top) - 50;
+          let planeBullet = new Bullet('./img/own/daodan1.png',bulletLeft,bulletTop,10);
+          bulletArray.push(planeBullet);
+          this.shootOnce++;
+        }
+      }
+    }
   }
   function startKey() {
     document.documentElement.onkeydown = function (e) {
@@ -148,6 +164,9 @@
       if (e.keyCode == 40) {
         myAirPlane.isMoveBottom = true;
       }
+      if (e.keyCode == 32) {
+        myAirPlane.isShoot = true;
+      }
     };
     document.documentElement.onkeyup = function (e) {
       //up : 38  down: 40 left: 37 right: 39
@@ -162,6 +181,10 @@
       }
       if (e.keyCode == 40) {
         myAirPlane.isMoveBottom = false;
+      }
+      if (e.keyCode == 32) {
+        myAirPlane.isShoot = false;
+        myAirPlane.shootOnce = 0;
       }
     }
   }
@@ -179,6 +202,10 @@
     if(myAirPlane.isMoveRight){
       myAirPlane.moveR();
     }
+  }
+
+  function planeShoot() {
+      myAirPlane.shoot();
   }
 
 
@@ -212,7 +239,49 @@
   }
   function enemyMove() {
     for (i=0;i<enemyPlaneArray.length;i++){
-          enemyPlaneArray[i].move();
+      if(parseInt(enemyPlaneArray[i].enemy.style.top) > 602){
+        main.removeChild(enemyPlaneArray[i].enemy);
+        enemyPlaneArray.splice(i,1);
+      }else{
+        enemyPlaneArray[i].move();
+      }
+    }
+  }
+
+  /*
+  * img
+  * left
+  * top
+  * speed
+  * move
+  * */
+  function Bullet(img,left,top,speed) {
+    this.img = img;
+    this.left = left;
+    this.top = top;
+    this.speed = speed;
+    this.init = function () {
+      this.bullet = document.createElement('img');
+      this.bullet.src = this.img;
+      this.bullet.style.position = 'absolute';
+      this.bullet.style.top = this.top + 'px';
+      this.bullet.style.left = this.left + 'px';
+      main.appendChild(this.bullet);
+    };
+    this.init();
+    this.move = function () {
+      this.bullet.style.top = parseInt(this.bullet.style.top)-this.speed + 'px';
+    }
+  }
+
+  function bulletMove() {
+    for (i=0;i<bulletArray.length;i++){
+      if(parseInt(bulletArray[i].bullet.style.top) < -50){
+        main.removeChild(bulletArray[i].bullet);
+        bulletArray.splice(i,1);
+      }else{
+        bulletArray[i].move();
+      }
     }
   }
 
